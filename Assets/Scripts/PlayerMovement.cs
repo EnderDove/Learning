@@ -12,21 +12,30 @@ public class PlayerMovement : MonoBehaviour
 
     // Timers
     public float LastOnGroundTime { get; private set; }
+    public float LastPressedJumpTime { get; private set; }
 
-    // Checkers
-    private bool isFacingRight = true;
+    [Header("Checks")]
+    [SerializeField] private Transform groundCheckPoint;
+    [SerializeField] private Vector2 groundCheckSize = new(.5f, .03f);
+    public bool IsFacingRight { get; private set; }
+    public bool IsJumping { get; private set; }
+    private bool isJumpFalling;
+
+    [Header("Layers")]
+    [SerializeField] private LayerMask whatIsGround;
 
     private void Awake()
     {
-        //LastOnGroundTime = 0f;
-
         footstepsEmissionModule = FootstepsParticles.emission;
         playerBody = GetComponent<Rigidbody2D>();
+
+        IsFacingRight = true;
     }
 
     private void Update()
     {
-        //LastOnGroundTime -= Time.fixedDeltaTime;
+        LastOnGroundTime -= Time.deltaTime;
+        LastPressedJumpTime -= Time.deltaTime;
 
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
@@ -37,6 +46,33 @@ public class PlayerMovement : MonoBehaviour
             CheckFaceDirection(moveInput.x > 0.01f);
             footstepsEmissionModule.enabled = true;
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            OnJumpInput();
+        }
+
+        if (!IsJumping)
+        {
+            if (Physics2D.OverlapBox(groundCheckPoint.position, groundCheckSize, 0, whatIsGround))
+            {
+                LastOnGroundTime = playerState.coyoteTime;
+            }
+        }
+
+        if (IsJumping && playerBody.velocity.y < 0)
+        {
+            IsJumping = false;
+            isJumpFalling = true;
+        }
+
+        if (canJump() && LastPressedJumpTime > 0)
+        {
+            IsJumping = true;
+            isJumpFalling = false;
+            Jump();
+        }
+
     }
 
     private void FixedUpdate()
@@ -60,9 +96,31 @@ public class PlayerMovement : MonoBehaviour
         playerBody.AddForce(movement * Vector2.right, ForceMode2D.Force);
     }
 
+    private void Jump()
+    {
+        LastPressedJumpTime = 0;
+        LastOnGroundTime = 0;
+
+        float force = playerState.jumpForce;
+        if (playerBody.velocity.y < 0)
+            force -= playerBody.velocity.y;
+
+        playerBody.AddForce(Vector2.up * force, ForceMode2D.Impulse);
+    }
+
+    public void OnJumpInput()
+    {
+        LastPressedJumpTime = playerState.jumpInputBufferTime;
+    }
+
+    private bool canJump()
+    {
+        return LastOnGroundTime > 0 && !IsJumping;
+    }
+
     private void CheckFaceDirection(bool isMovingRight)
     {
-        if (isFacingRight != isMovingRight)
+        if (IsFacingRight != isMovingRight)
             Turn();
 
     }
@@ -73,6 +131,12 @@ public class PlayerMovement : MonoBehaviour
         scale.x *= -1;
         transform.localScale = scale;
 
-        isFacingRight = !isFacingRight;
+        IsFacingRight = !IsFacingRight;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(groundCheckPoint.position, groundCheckSize);
     }
 }
