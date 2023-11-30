@@ -1,11 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody2D playerBody;
     private Vector2 moveInput;
+
+    public ParticleSystem FootstepsParticles;
+    private ParticleSystem.EmissionModule footstepsEmissionModule;
 
     public PlayerState playerState;
 
@@ -19,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     {
         //LastOnGroundTime = 0f;
 
+        footstepsEmissionModule = FootstepsParticles.emission;
         playerBody = GetComponent<Rigidbody2D>();
     }
 
@@ -29,10 +31,12 @@ public class PlayerMovement : MonoBehaviour
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
 
+        footstepsEmissionModule.enabled = false;
         if (moveInput.x != 0)
         {
             CheckFaceDirection(moveInput.x > 0.01f);
-        }    
+            footstepsEmissionModule.enabled = true;
+        }
     }
 
     private void FixedUpdate()
@@ -48,7 +52,7 @@ public class PlayerMovement : MonoBehaviour
 
         float accelRate;
         accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? playerState.runAccelAmount : playerState.runDeccelAmount;
-        
+
 
         float speedDif = targetSpeed - playerBody.velocity.x;
         float movement = speedDif * accelRate;

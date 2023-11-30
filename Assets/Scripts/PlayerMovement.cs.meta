@@ -3,7 +3,9 @@ guid: aeab2f2f74f5642fd82b8c4303a9be68
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - FootstepsParticles: {instanceID: 0}
+  - playerState: {fileID: 11400000, guid: a01cce05a38aa4f039d56bed4f831e08, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
