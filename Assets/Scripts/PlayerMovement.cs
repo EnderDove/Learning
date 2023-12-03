@@ -5,6 +5,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D playerBody;
     private Vector2 moveInput;
 
+    // from homework 2
     public ParticleSystem FootstepsParticles;
     private ParticleSystem.EmissionModule footstepsEmissionModule;
 
@@ -12,21 +13,29 @@ public class PlayerMovement : MonoBehaviour
 
     // Timers
     public float LastOnGroundTime { get; private set; }
+    public float LastPressedJumpTime { get; private set; }
 
     // Checkers
-    private bool isFacingRight = true;
+    public bool IsFacingRight { get; private set; }
+    public bool IsJumping { get; private set; }
+
+    [SerializeField] private Transform groundCheckerPoint;
+    [SerializeField] private Vector2 groundCheckerSize = new(0.5f, 0.03f);
+
+    [Header("Layers")]
+    [SerializeField] private LayerMask whatIsGround;
 
     private void Awake()
     {
-        //LastOnGroundTime = 0f;
-
+        IsFacingRight = true;
         footstepsEmissionModule = FootstepsParticles.emission;
         playerBody = GetComponent<Rigidbody2D>();
     }
 
     private void Update()
     {
-        //LastOnGroundTime -= Time.fixedDeltaTime;
+        LastOnGroundTime -= Time.deltaTime;
+        LastPressedJumpTime -= Time.deltaTime;
 
         moveInput.x = Input.GetAxisRaw("Horizontal");
         moveInput.y = Input.GetAxisRaw("Vertical");
@@ -35,7 +44,32 @@ public class PlayerMovement : MonoBehaviour
         if (moveInput.x != 0)
         {
             CheckFaceDirection(moveInput.x > 0.01f);
-            footstepsEmissionModule.enabled = true;
+            if (!IsJumping)
+                footstepsEmissionModule.enabled = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            OnJumpInput();
+        }
+
+        if (!IsJumping)
+        {
+            if (Physics2D.OverlapBox(groundCheckerPoint.position, groundCheckerSize, 0, whatIsGround))
+            {
+                LastOnGroundTime = playerState.coyoteTime;
+            }
+        }
+
+        if (IsJumping && playerBody.velocity.y < 0)
+        {
+            IsJumping = false;
+        }
+
+        if (CanJump() && LastPressedJumpTime > 0)
+        {
+            IsJumping = true;
+            Jump();
         }
     }
 
@@ -60,9 +94,34 @@ public class PlayerMovement : MonoBehaviour
         playerBody.AddForce(movement * Vector2.right, ForceMode2D.Force);
     }
 
+    private void Jump()
+    {
+        LastOnGroundTime = 0;
+        LastPressedJumpTime = 0;
+
+        float force = playerState.jumpForce;
+
+        if (playerBody.velocity.y < 0)
+        {
+            force -= playerBody.velocity.y;
+        }
+
+        playerBody.AddForce(Vector2.up * force, ForceMode2D.Impulse);
+    }
+
+    private void OnJumpInput()
+    {
+        LastPressedJumpTime = playerState.jumpInputBufferTime;
+    }
+
+    private bool CanJump()
+    {
+        return LastOnGroundTime > 0 && !IsJumping;
+    }
+
     private void CheckFaceDirection(bool isMovingRight)
     {
-        if (isFacingRight != isMovingRight)
+        if (IsFacingRight != isMovingRight)
             Turn();
 
     }
@@ -73,6 +132,12 @@ public class PlayerMovement : MonoBehaviour
         scale.x *= -1;
         transform.localScale = scale;
 
-        isFacingRight = !isFacingRight;
+        IsFacingRight = !IsFacingRight;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(groundCheckerPoint.position, groundCheckerSize);
     }
 }
