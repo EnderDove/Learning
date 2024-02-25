@@ -1062,7 +1062,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -6725,8 +6725,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeab2f2f74f5642fd82b8c4303a9be68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FootstepsParticles: {fileID: 308465859}
   playerState: {fileID: 11400000, guid: a01cce05a38aa4f039d56bed4f831e08, type: 2}
+  FootstepsParticles: {fileID: 308465859}
   groundCheckerPoint: {fileID: 1656464489}
   groundCheckerSize: {x: 0.5, y: 0.03}
   whatIsGround:
