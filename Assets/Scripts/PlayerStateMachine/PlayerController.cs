@@ -1,10 +1,11 @@
+using System;
 using UnityEngine;
 
-public class PlayerStateManager : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public Rigidbody2D PlayerBody { get; private set; }
+    public InputHandler InputHandler { get; private set; }
     public PlayerState playerState;
-    public InputHandler inputHandler;
 
     private BaseState currentState;
 
@@ -21,9 +22,9 @@ public class PlayerStateManager : MonoBehaviour
     [SerializeField] private Transform groundCheckerPoint;
     [SerializeField] private Vector2 groundCheckerSize = new(0.5f, 0.03f);
 
-    public LayerMask WhatIsGround => whatIsGround;
     [Header("Layers")]
     [SerializeField] private LayerMask whatIsGround;
+    public LayerMask WhatIsGround => whatIsGround;
 
     private void Awake()
     {
@@ -31,13 +32,13 @@ public class PlayerStateManager : MonoBehaviour
         FootstepsEmissionModule = FootstepsParticles.emission;
         PlayerBody = GetComponent<Rigidbody2D>();
         currentState = PlayerStateFactory.Fall(this);
-        inputHandler = new(this);
+        InputHandler = new(this);
     }
 
     private void Update()
     {
         currentState.UpdateState(Time.deltaTime);
-        inputHandler.Update(Time.deltaTime);
+        InputHandler.Update(Time.deltaTime);
     }
 
     private void FixedUpdate()
@@ -45,9 +46,17 @@ public class PlayerStateManager : MonoBehaviour
         currentState.FixedUpdateState(Time.fixedDeltaTime);
     }
 
+    public void SwitchState(BaseState state)
+    {
+        currentState.ExitState();
+        GC.SuppressFinalize(currentState);
+        currentState = state;
+        currentState.EnterState();
+    }
+
     public void Run(float lerpAmount, float accel, float deccel)
     {
-        float targetSpeed = inputHandler.MoveInput.x * playerState.runMaxSpeed;
+        float targetSpeed = InputHandler.MoveInput.x * playerState.runMaxSpeed;
 
         targetSpeed = Mathf.Lerp(PlayerBody.velocity.x, targetSpeed, lerpAmount);
 
@@ -59,11 +68,15 @@ public class PlayerStateManager : MonoBehaviour
         float movement = speedDif * accelRate;
 
         PlayerBody.AddForce(movement * Vector2.right, ForceMode2D.Force);
+        if (InputHandler.MoveInput.x != 0)
+        {
+            CheckFaceDirection();
+        }
     }
 
     public void CheckFaceDirection()
     {
-        if (IsFacingRight != (inputHandler.MoveInput.x > 0.01f))
+        if (IsFacingRight != (InputHandler.MoveInput.x > 0.01f))
             Turn();
 
     }
@@ -81,12 +94,5 @@ public class PlayerStateManager : MonoBehaviour
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireCube(groundCheckerPoint.position, groundCheckerSize);
-    }
-
-    public void SwitchState(BaseState state)
-    {
-        currentState.ExitState();
-        currentState = state;
-        currentState.EnterState();
     }
 }

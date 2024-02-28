@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class JumpState : BaseState
 {
-    public JumpState(PlayerStateManager player)
+    public JumpState(PlayerController player)
     {
         Player = player;
     }

@@ -1,6 +1,6 @@
 public abstract class BaseState
 {
-    public PlayerStateManager Player { get; set; }
+    public PlayerController Player { get; set; }
 
     public virtual void EnterState()
     {

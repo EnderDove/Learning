@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class InputHandler
 {
-    public InputHandler(PlayerStateManager player)
+    public InputHandler(PlayerController player)
     {
         this.player = player;
     }
@@ -10,7 +10,7 @@ public class InputHandler
     public float LastPressedJumpTime { get; private set; }
     public Vector2 MoveInput => moveInput;
 
-    private readonly PlayerStateManager player;
+    private readonly PlayerController player;
     private Vector2 moveInput;
 
     public void Update(float deltaTime)

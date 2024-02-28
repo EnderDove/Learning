@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GroundedState : BaseState
 {
-    public GroundedState(PlayerStateManager player)
+    public GroundedState(PlayerController player)
     {
         Player = player;
     }
@@ -26,14 +26,13 @@ public class GroundedState : BaseState
 
         Player.Run(1, Player.playerState.runAccelAmount, Player.playerState.runDeccelAmount);
 
-        if (CanJump() && Player.inputHandler.LastPressedJumpTime > 0)
+        if (CanJump() && Player.InputHandler.LastPressedJumpTime > 0)
         {
             Player.SwitchState(PlayerStateFactory.Jump(Player));
             return;
         }
-        if (Player.inputHandler.MoveInput.x != 0)
+        if (Player.InputHandler.MoveInput.x != 0)
         {
-            Player.CheckFaceDirection();
             Player.FootstepsEmissionModule.enabled = true;
         }
     }

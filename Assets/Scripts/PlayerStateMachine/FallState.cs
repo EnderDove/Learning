@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class FallState : BaseState
 {
-    public FallState(PlayerStateManager player)
+    public FallState(PlayerController player)
     {
         Player = player;
     }
