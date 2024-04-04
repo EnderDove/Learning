@@ -13,6 +13,12 @@ public class FallState : BaseState
             Player.ChangeState(PlayerStateFactory.Grounded(Player));
             return;
         }
+
+        if (Physics2D.OverlapBox(Player.WallCheckerPoint.position, Player.WallCheckerSize, 0, Player.WhatIsGround))
+        {
+            Player.ChangeState(PlayerStateFactory.OnWall(Player));
+            return;
+        }
     }
 
 }

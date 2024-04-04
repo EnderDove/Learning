@@ -18,4 +18,9 @@ public class PlayerState : ScriptableObject
 
     public float accelInAir;
     public float deccelInAir;
+
+    [Space(5)]
+
+    [Header("On wall")]
+    public float slidingSpeed = 1.5f;
 }

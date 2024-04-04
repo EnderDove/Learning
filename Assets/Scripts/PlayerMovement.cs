@@ -8,8 +8,8 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 MoveInput => moveInput;
     private Vector2 moveInput;
 
-    // from homework 2
     public ParticleSystem.EmissionModule FootstepsEmissionModule;
+    public ParticleSystem LandingParticles;
     [SerializeField] private ParticleSystem FootstepsParticles;
 
     public PlayerState playerState;
@@ -25,6 +25,11 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 GroundCheckerSize => groundCheckerSize;
     [SerializeField] private Transform groundCheckerPoint;
     [SerializeField] private Vector2 groundCheckerSize = new(0.5f, 0.03f);
+
+    public Transform WallCheckerPoint => wallCheckerPoint;
+    public Vector2 WallCheckerSize => wallCheckerSize;
+    [SerializeField] private Transform wallCheckerPoint;
+    [SerializeField] private Vector2 wallCheckerSize = new(0.5f, 0.03f);
 
 
     public LayerMask WhatIsGround => whatIsGround;
@@ -89,18 +94,14 @@ public class PlayerMovement : MonoBehaviour
         PlayerBody.AddForce(movement * Vector2.right, ForceMode2D.Force);
     }
 
-    public void Jump()
+    public void Jump(Vector2 jumpDir)
     {
         LastPressedJumpTime = 0;
 
-        float force = playerState.jumpForce;
+        Vector2 force = jumpDir * playerState.jumpForce;
+        force.y -= PlayerBody.velocity.y;
 
-        if (PlayerBody.velocity.y < 0)
-        {
-            force -= PlayerBody.velocity.y;
-        }
-
-        PlayerBody.AddForce(Vector2.up * force, ForceMode2D.Impulse);
+        PlayerBody.AddForce(force, ForceMode2D.Impulse);
     }
 
     private void OnJumpInput()
@@ -128,5 +129,6 @@ public class PlayerMovement : MonoBehaviour
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireCube(groundCheckerPoint.position, groundCheckerSize);
+        Gizmos.DrawWireCube(wallCheckerPoint.position, wallCheckerSize);
     }
 }

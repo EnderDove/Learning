@@ -2,11 +2,13 @@ using UnityEngine;
 
 public class JumpState : BaseState
 {
-    public JumpState(PlayerMovement player) => Player = player;
+    public JumpState(PlayerMovement player, Vector2 jumpDir) => (Player, _jumpDir) = (player, jumpDir);
+    private Vector2 _jumpDir;
 
     public override void EnterState()
     {
-        Player.Jump();
+        Player.Jump(_jumpDir);
+        Player.LandingParticles.Play();
     }
 
     public override void FixedUpdateState(float deltaTime)
