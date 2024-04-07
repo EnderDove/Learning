@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(AttackHandler), typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour
 {
     public BaseState CurrentState { get; private set; }
     public Rigidbody2D PlayerBody { get; private set; }
     public Vector2 MoveInput => moveInput;
     private Vector2 moveInput;
+    private AttackHandler attackHandler;
 
     public ParticleSystem.EmissionModule FootstepsEmissionModule;
     public ParticleSystem LandingParticles;
@@ -43,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
         IsFacingRight = true;
         FootstepsEmissionModule = FootstepsParticles.emission;
         PlayerBody = GetComponent<Rigidbody2D>();
+        attackHandler = GetComponent<AttackHandler>();
     }
 
     public void ChangeState(BaseState state)
@@ -66,6 +69,9 @@ public class PlayerMovement : MonoBehaviour
         {
             OnJumpInput();
         }
+
+        if (Input.GetKeyDown(KeyCode.X))
+            attackHandler.ballPool.Get();
 
         if (MoveInput.x != 0)
         {
